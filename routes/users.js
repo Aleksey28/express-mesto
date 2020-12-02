@@ -8,7 +8,7 @@ router.get('/users', (req, res) => {
 router.get('/users/:id', (req, res) => {
   const user = users.find((item) => item._id === req.params.id);
   if (!user) {
-    res.send({ message: 'Запрашиваемый пользователь не найден' });
+    res.status(404).send({ message: 'Нет пользователя с таким id' });
     return;
   }
   res.send(user);

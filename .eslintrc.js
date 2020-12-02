@@ -16,5 +16,6 @@ module.exports = {
         allow: ['_id', '__dirname'],
       },
     ],
+    'no-console': 'off',
   },
 };
