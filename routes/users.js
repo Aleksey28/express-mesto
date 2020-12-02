@@ -1,17 +1,29 @@
 const router = require('express').Router();
-const users = require('../data/users.json');
+const path = require('path');
+const fsPromise = require('fs').promises;
+
+const dataPath = path.join(__dirname, '../data/users.json');
 
 router.get('/users', (req, res) => {
-  res.send(users);
+  fsPromise
+    .readFile(dataPath, { encoding: 'utf8' })
+    .then((data) => {
+      res.send(data);
+    })
+    .catch(() => {
+      res.status(500).send({ message: 'Server was broken =(' });
+    });
 });
 
 router.get('/users/:id', (req, res) => {
-  const user = users.find((item) => item._id === req.params.id);
-  if (!user) {
-    res.status(404).send({ message: 'Нет пользователя с таким id' });
-    return;
-  }
-  res.send(user);
+  fsPromise.readFile(dataPath, { encoding: 'utf8' }).then((data) => {
+    const user = JSON.parse(data).find((item) => item._id === req.params.id);
+    if (!user) {
+      res.status(404).send({ message: 'Нет пользователя с таким id' });
+      return;
+    }
+    res.send(user);
+  });
 });
 
 module.exports = router;
