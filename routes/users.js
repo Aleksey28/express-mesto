@@ -2,12 +2,12 @@ const router = require('express').Router();
 const path = require('path');
 const fsPromise = require('fs').promises;
 
-const dataPath = path.join(__dirname, '../data/userss.json');
+const dataPath = path.join(__dirname, '../data/users.json');
 
 router.get('/users', (req, res) => {
   fsPromise.readFile(dataPath, { encoding: 'utf8' })
     .then((data) => {
-      res.send(data);
+      res.send(JSON.parse(data));
     })
     .catch(() => {
       res.status(500).send({ message: 'Server was broken =(' });
