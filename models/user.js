@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema({
       validator: (v) => /https?:\/\/(w{3}\.)?[\w\-.~:/?#[\]@!$&'\\()*+,;=]/.test(v),
       message: 'Не верно указан адрес.',
     },
+    required: true,
   },
 });
 
