@@ -1,16 +1,16 @@
 const User = require('../models/user');
 
-module.exports.getUsers = (req, res) => {
+const getUsers = (req, res) => {
   User.find({})
     .then((data) => {
-      res.send(JSON.parse(data));
+      res.send(data);
     })
     .catch(() => {
       res.status(500).send({ message: 'Server was broken =(' });
     });
 };
 
-module.exports.getUser = (req, res) => {
+const getUser = (req, res) => {
   User.findById(req.params.id)
     .then((data) => {
       res.send(data);
@@ -19,3 +19,16 @@ module.exports.getUser = (req, res) => {
       res.status(404).send({ message: 'Нет пользователя с таким id' });
     });
 };
+
+const createUser = (req, res) => {
+  const { name, about, avatar } = req.body;
+  User.create({ name, about, avatar })
+    .then((data) => {
+      res.send(data);
+    })
+    .catch((error) => {
+      res.status(404).send({ message: error });
+    });
+};
+
+module.exports = { getUsers, getUser, createUser };

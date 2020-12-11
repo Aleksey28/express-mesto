@@ -1,8 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
-
-const path = require('path');
-
+const bodyParser = require('body-parser');
 const cards = require('./routes/cards');
 const users = require('./routes/users');
 
@@ -19,7 +17,14 @@ const sendMessageError = (req, res) => {
   res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
 };
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.json());
+app.use((req, res, next) => {
+  req.user = {
+    _id: '5fd3f4da730a4b61f8e0152c', // вставьте сюда _id созданного в предыдущем пункте пользователя
+  };
+
+  next();
+});
 app.use('/', cards);
 app.use('/', users);
 app.use(sendMessageError);
