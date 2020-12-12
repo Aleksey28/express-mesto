@@ -10,10 +10,6 @@ const {
 const getUsers = (req, res) => {
   User.find({})
     .then((data) => {
-      if (data.length <= 0) {
-        res.status(ERROR_NOT_FOUND_CODE).send({ message: 'Список пользователей пуст' });
-        return;
-      }
       res.send(data);
     })
     .catch(() => {
@@ -42,7 +38,6 @@ const createUser = (req, res) => {
       res.send(data);
     })
     .catch((error) => {
-      console.log(error.name);
       if (error.name === VALIDATION_ERROR_NAME) {
         res.status(ERROR_WRONG_DATA_CODE).send({ message: error.message });
       } else {

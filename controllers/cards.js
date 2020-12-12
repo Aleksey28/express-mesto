@@ -1,4 +1,11 @@
 const Card = require('../models/card');
+const {
+  ERROR_WRONG_DATA_CODE,
+  ERROR_NOT_FOUND_CODE,
+  ERROR_DEFAULT_CODE,
+  ERROR_DEFAULT_MESSAGE,
+  VALIDATION_ERROR_NAME,
+} = require('../utils/constants');
 
 const getCards = (req, res) => {
   Card.find({})
@@ -6,7 +13,7 @@ const getCards = (req, res) => {
       res.send(data);
     })
     .catch(() => {
-      res.status(500).send({ message: 'Server was broken =(' });
+      res.status(ERROR_DEFAULT_CODE).send({ message: ERROR_DEFAULT_MESSAGE });
     });
 };
 
@@ -16,18 +23,26 @@ const createCard = (req, res) => {
     .then((data) => {
       res.send(data);
     })
-    .catch(() => {
-      res.status(500).send({ message: 'Server was broken =(' });
+    .catch((error) => {
+      if (error.name === VALIDATION_ERROR_NAME) {
+        res.status(ERROR_WRONG_DATA_CODE).send({ message: error.message });
+      } else {
+        res.status(ERROR_DEFAULT_CODE).send({ message: ERROR_DEFAULT_MESSAGE });
+      }
     });
 };
 
 const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.id)
     .then((data) => {
+      if (!data) {
+        res.status(ERROR_NOT_FOUND_CODE).send({ message: 'Нет карточки с таким id' });
+        return;
+      }
       res.send(data);
     })
     .catch(() => {
-      res.status(500).send({ message: 'Server was broken =(' });
+      res.status(ERROR_DEFAULT_CODE).send({ message: ERROR_DEFAULT_MESSAGE });
     });
 };
 
