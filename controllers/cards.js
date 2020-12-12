@@ -1,11 +1,10 @@
 const Card = require('../models/card');
 const {
-  ERROR_WRONG_DATA_CODE,
   ERROR_NOT_FOUND_CODE,
-  ERROR_DEFAULT_CODE,
-  ERROR_DEFAULT_MESSAGE,
-  VALIDATION_ERROR_NAME,
 } = require('../utils/constants');
+const {
+  sendError,
+} = require('../utils/functions');
 
 const getCards = (req, res) => {
   Card.find({})
@@ -13,7 +12,7 @@ const getCards = (req, res) => {
       res.send(data);
     })
     .catch(() => {
-      res.status(ERROR_DEFAULT_CODE).send({ message: ERROR_DEFAULT_MESSAGE });
+      sendError(res);
     });
 };
 
@@ -24,11 +23,7 @@ const createCard = (req, res) => {
       res.send(data);
     })
     .catch((error) => {
-      if (error.name === VALIDATION_ERROR_NAME) {
-        res.status(ERROR_WRONG_DATA_CODE).send({ message: error.message });
-      } else {
-        res.status(ERROR_DEFAULT_CODE).send({ message: ERROR_DEFAULT_MESSAGE });
-      }
+      sendError(res, error);
     });
 };
 
@@ -38,16 +33,58 @@ const deleteCard = (req, res) => {
     owner: req.user._id,
   })
     .then((data) => {
-      console.log(data);
       if (!data) {
-        res.status(ERROR_NOT_FOUND_CODE).send({ message: 'Нет карточки с таким id для текущего пользователя' });
+        const errorMessage = 'Нет карточки с таким id для текущего пользователя';
+        sendError(res, errorMessage, ERROR_NOT_FOUND_CODE);
         return;
       }
       res.send(data);
     })
     .catch(() => {
-      res.status(ERROR_DEFAULT_CODE).send({ message: ERROR_DEFAULT_MESSAGE });
+      sendError(res);
     });
 };
 
-module.exports = { getCards, createCard, deleteCard };
+const likeCard = (req, res) => {
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
+    { new: true },
+  )
+    .then((data) => {
+      if (!data) {
+        const errorMessage = 'Нет карточки с таким id';
+        sendError(res, errorMessage, ERROR_NOT_FOUND_CODE);
+      }
+      res.send(data);
+    })
+    .catch(() => {
+      sendError(res);
+    });
+};
+
+const dislikeCard = (req, res) => {
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $pull: { likes: req.user._id } }, // убрать _id из массива
+    { new: true },
+  )
+    .then((data) => {
+      if (!data) {
+        const errorMessage = 'Нет карточки с таким id';
+        sendError(res, errorMessage, ERROR_NOT_FOUND_CODE);
+      }
+      res.send(data);
+    })
+    .catch(() => {
+      sendError(res);
+    });
+};
+
+module.exports = {
+  getCards,
+  createCard,
+  deleteCard,
+  likeCard,
+  dislikeCard,
+};

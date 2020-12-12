@@ -22,7 +22,6 @@ app.use((req, res, next) => {
   req.user = {
     _id: '5fd3f4da730a4b61f8e0152c', // вставьте сюда _id созданного в предыдущем пункте пользователя
   };
-
   next();
 });
 app.use('/', cards);

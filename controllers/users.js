@@ -1,11 +1,10 @@
 const User = require('../models/user');
 const {
-  ERROR_WRONG_DATA_CODE,
   ERROR_NOT_FOUND_CODE,
-  ERROR_DEFAULT_CODE,
-  ERROR_DEFAULT_MESSAGE,
-  VALIDATION_ERROR_NAME,
 } = require('../utils/constants');
+const {
+  sendError,
+} = require('../utils/functions');
 
 const getUsers = (req, res) => {
   User.find({})
@@ -13,7 +12,7 @@ const getUsers = (req, res) => {
       res.send(data);
     })
     .catch(() => {
-      res.status(ERROR_DEFAULT_CODE).send({ message: ERROR_DEFAULT_MESSAGE });
+      sendError(res);
     });
 };
 
@@ -21,13 +20,14 @@ const getUser = (req, res) => {
   User.findById(req.params.id)
     .then((data) => {
       if (!data) {
-        res.status(ERROR_NOT_FOUND_CODE).send({ message: 'Нет пользователя с таким id' });
+        const errorMessage = 'Нет пользователя с таким id';
+        sendError(res, errorMessage, ERROR_NOT_FOUND_CODE);
         return;
       }
       res.send(data);
     })
     .catch(() => {
-      res.status(ERROR_DEFAULT_CODE).send({ message: ERROR_DEFAULT_MESSAGE });
+      sendError(res);
     });
 };
 
@@ -38,12 +38,61 @@ const createUser = (req, res) => {
       res.send(data);
     })
     .catch((error) => {
-      if (error.name === VALIDATION_ERROR_NAME) {
-        res.status(ERROR_WRONG_DATA_CODE).send({ message: error.message });
-      } else {
-        res.status(ERROR_DEFAULT_CODE).send({ message: ERROR_DEFAULT_MESSAGE });
-      }
+      sendError(res, error);
     });
 };
 
-module.exports = { getUsers, getUser, createUser };
+const updateUserInfo = (req, res) => {
+  const { name, about } = req.body;
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name, about },
+    {
+      new: true, // обработчик then получит на вход обновлённую запись
+      runValidators: true, // данные будут валидированы перед изменением
+      upsert: true, // если пользователь не найден, он будет создан
+    },
+  )
+    .then((data) => {
+      if (!data) {
+        const errorMessage = 'Нет пользователя с таким id';
+        sendError(res, errorMessage, ERROR_NOT_FOUND_CODE);
+        return;
+      }
+      res.send(data);
+    })
+    .catch((error) => {
+      sendError(res, error);
+    });
+};
+
+const updateUserAvatar = (req, res) => {
+  const { avatar } = req.body;
+  User.findByIdAndUpdate(
+    req.user._id,
+    { avatar },
+    {
+      new: true, // обработчик then получит на вход обновлённую запись
+      runValidators: true, // данные будут валидированы перед изменением
+      upsert: true, // если пользователь не найден, он будет создан
+    },
+  )
+    .then((data) => {
+      if (!data) {
+        const errorMessage = 'Нет пользователя с таким id';
+        sendError(res, errorMessage, ERROR_NOT_FOUND_CODE);
+        return;
+      }
+      res.send(data);
+    })
+    .catch((error) => {
+      sendError(res, error);
+    });
+};
+module.exports = {
+  getUsers,
+  getUser,
+  createUser,
+  updateUserInfo,
+  updateUserAvatar,
+};
