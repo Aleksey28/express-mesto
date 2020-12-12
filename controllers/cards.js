@@ -33,10 +33,14 @@ const createCard = (req, res) => {
 };
 
 const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.id)
+  Card.findOneAndDelete({
+    _id: req.params.cardId,
+    owner: req.user._id,
+  })
     .then((data) => {
+      console.log(data);
       if (!data) {
-        res.status(ERROR_NOT_FOUND_CODE).send({ message: 'Нет карточки с таким id' });
+        res.status(ERROR_NOT_FOUND_CODE).send({ message: 'Нет карточки с таким id для текущего пользователя' });
         return;
       }
       res.send(data);
