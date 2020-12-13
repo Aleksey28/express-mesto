@@ -55,6 +55,7 @@ const likeCard = (req, res) => {
       if (!data) {
         const errorMessage = 'Нет карточки с таким id';
         sendError(res, errorMessage, ERROR_NOT_FOUND_CODE);
+        return;
       }
       res.send(data);
     })
@@ -73,6 +74,7 @@ const dislikeCard = (req, res) => {
       if (!data) {
         const errorMessage = 'Нет карточки с таким id';
         sendError(res, errorMessage, ERROR_NOT_FOUND_CODE);
+        return;
       }
       res.send(data);
     })
