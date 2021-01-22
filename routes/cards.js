@@ -1,4 +1,5 @@
-const router = require('express').Router();
+const router = require('express')
+  .Router();
 const {
   getCards,
   createCard,
@@ -7,6 +8,7 @@ const {
   dislikeCard,
 } = require('../controllers/cards');
 
+// TODO add validation for routes
 router.get('/cards', getCards);
 router.post('/cards', createCard);
 router.delete('/cards/:cardId', deleteCard);
