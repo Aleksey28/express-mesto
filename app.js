@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cards = require('./routes/cards');
 const users = require('./routes/users');
-const { errorLogger, requestLogger } = require('./middlewares/logger');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -14,7 +14,22 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useFindAndModify: false,
 });
 
-const sendMessageError = (err, req, res, next) => {
+app.use(bodyParser.json());
+app.use((req, res, next) => {
+  req.user = {
+    _id: '5fd3f4da730a4b61f8e0152c', // вставьте сюда _id созданного в предыдущем пункте пользователя
+  };
+  next();
+});
+
+app.use(requestLogger);
+
+app.use('/', cards);
+app.use('/', users);
+
+app.use(errorLogger);
+
+app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
   res
     .status(statusCode)
@@ -25,23 +40,7 @@ const sendMessageError = (err, req, res, next) => {
         : message,
     });
   next();
-};
-
-app.use(requestLogger);
-
-app.use(bodyParser.json());
-app.use((req, res, next) => {
-  req.user = {
-    _id: '5fd3f4da730a4b61f8e0152c', // вставьте сюда _id созданного в предыдущем пункте пользователя
-  };
-  next();
 });
-app.use('/', cards);
-app.use('/', users);
-
-app.use(errorLogger);
-
-app.use(sendMessageError);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
