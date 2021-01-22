@@ -13,8 +13,17 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useFindAndModify: false,
 });
 
-const sendMessageError = (req, res) => {
-  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
+const sendMessageError = (err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+  res
+    .status(statusCode)
+    .send({
+      // проверяем статус и выставляем сообщение в зависимости от него
+      message: statusCode === 500
+        ? 'Server was broken =('
+        : message,
+    });
+  next();
 };
 
 app.use(bodyParser.json());

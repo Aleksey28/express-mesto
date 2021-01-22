@@ -1,4 +1,5 @@
 const Card = require('../models/card');
+const NotFoundErr = require('../errors/not-found-err');
 const {
   ERROR_NOT_FOUND_CODE,
 } = require('../utils/constants');
@@ -6,46 +7,42 @@ const {
   sendError,
 } = require('../utils/functions');
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .then((data) => {
       res.send(data);
     })
-    .catch(() => {
-      sendError(res);
-    });
+    .catch(next);
 };
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
-  Card.create({ name, link, owner: req.user._id })
+  Card.create({
+    name,
+    link,
+    owner: req.user._id,
+  })
     .then((data) => {
       res.send(data);
     })
-    .catch((error) => {
-      sendError(res, error);
-    });
+    .catch(next);
 };
 
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   Card.findOneAndDelete({
     _id: req.params.cardId,
     owner: req.user._id,
   })
     .then((data) => {
       if (!data) {
-        const errorMessage = 'Нет карточки с таким id для текущего пользователя';
-        sendError(res, errorMessage, ERROR_NOT_FOUND_CODE);
-        return;
+        throw new NotFoundErr('Нет карточки с таким id');
       }
       res.send(data);
     })
-    .catch(() => {
-      sendError(res);
-    });
+    .catch(next);
 };
 
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
@@ -53,18 +50,14 @@ const likeCard = (req, res) => {
   )
     .then((data) => {
       if (!data) {
-        const errorMessage = 'Нет карточки с таким id';
-        sendError(res, errorMessage, ERROR_NOT_FOUND_CODE);
-        return;
+        throw new NotFoundErr('Нет карточки с таким id');
       }
       res.send(data);
     })
-    .catch(() => {
-      sendError(res);
-    });
+    .catch(next);
 };
 
-const dislikeCard = (req, res) => {
+const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
@@ -72,15 +65,11 @@ const dislikeCard = (req, res) => {
   )
     .then((data) => {
       if (!data) {
-        const errorMessage = 'Нет карточки с таким id';
-        sendError(res, errorMessage, ERROR_NOT_FOUND_CODE);
-        return;
+        throw new NotFoundErr('Нет карточки с таким id');
       }
       res.send(data);
     })
-    .catch(() => {
-      sendError(res);
-    });
+    .catch(next);
 };
 
 module.exports = {
