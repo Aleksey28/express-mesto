@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cards = require('./routes/cards');
 const users = require('./routes/users');
+const { errorLogger, requestLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -26,6 +27,8 @@ const sendMessageError = (err, req, res, next) => {
   next();
 };
 
+app.use(requestLogger);
+
 app.use(bodyParser.json());
 app.use((req, res, next) => {
   req.user = {
@@ -35,6 +38,9 @@ app.use((req, res, next) => {
 });
 app.use('/', cards);
 app.use('/', users);
+
+app.use(errorLogger);
+
 app.use(sendMessageError);
 
 app.listen(PORT, () => {
